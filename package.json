@@ -1,0 +1,13 @@
+{
+  "name": "capacitor-offline-download-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "AppsCounty demo: download extra content after install, cache it for offline use.",
+  "dependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0"
+  },
+  "license": "MIT",
+  "repository": "github:KalembaUG/capacitor-offline-download-demo"
+}

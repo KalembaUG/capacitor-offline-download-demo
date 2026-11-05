@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Farm Lessons</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <p class="eyebrow">Farm Lessons</p>
+      <h1>Good morning</h1>
+    </header>
+
+    <!-- Core feature: shipped inside the app, usable on first launch. -->
+    <section class="card lesson">
+      <img class="hero" src="img/lesson-today.jpg" alt="Watering young vegetable plants with a watering can" />
+      <div class="lesson-body">
+        <p class="label">Today's lesson · 4 min</p>
+        <h2>Watering your garden</h2>
+        <p class="muted">Water early in the morning, at the roots, and less often but deeply.</p>
+        <button class="btn">Start lesson</button>
+      </div>
+    </section>
+
+    <!-- Extra content: downloaded after install, while the app is open. -->
+    <section class="card" id="pack">
+      <div class="pack-head">
+        <div>
+          <p class="label">Offline pack</p>
+          <h2>Crop guides</h2>
+        </div>
+        <span class="badge" id="badge">Not downloaded</span>
+      </div>
+
+      <div id="state-idle">
+        <p class="muted" id="pack-size">11 photo guides · 0.6 MB · download once, use offline</p>
+        <button class="btn" id="download">Download</button>
+      </div>
+
+      <div id="state-loading" hidden>
+        <div class="grid">
+          <div class="thumb skeleton"></div><div class="thumb skeleton"></div><div class="thumb skeleton"></div>
+          <div class="thumb skeleton"></div><div class="thumb skeleton"></div><div class="thumb skeleton"></div>
+        </div>
+        <div class="bar"><div class="fill" id="fill"></div></div>
+        <p class="muted" id="progress-text">Downloading…</p>
+        <p class="hint">You can keep using the app while this downloads.</p>
+      </div>
+
+      <div id="state-ready" hidden>
+        <div class="grid" id="thumbs"></div>
+        <p class="muted" id="ready-text">Saved on this phone. Works offline.</p>
+      </div>
+
+      <div id="state-failed" hidden>
+        <p class="error">Download paused. Check your connection.</p>
+        <p class="muted" id="failed-text"></p>
+        <button class="btn" id="retry">Try again</button>
+      </div>
+    </section>
+
+  </main>
+  <script src="main.js"></script>
+</body>
+</html>

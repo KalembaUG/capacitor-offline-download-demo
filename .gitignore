@@ -1,0 +1,10 @@
+node_modules/
+ios/App/Pods/
+ios/DerivedData/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+xcuserdata/
+*.xcuserstate
+.DS_Store
+screenshots/simulator/cache-storage-error.png
