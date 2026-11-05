@@ -1,45 +1,83 @@
-# Capacitor offline download demo
+# Capacitor offline download demo: ship a small app, download content after install
 
-A small Capacitor app that ships only its core screen and downloads extra content **after install, while the app is open**, then keeps it on the phone so it works offline.
+A working Capacitor (Ionic) example of keeping a mobile app small: the app ships only its core screen, downloads extra images **after install while the app is open**, shows progress, resumes after a failed download, and keeps everything on the phone for **offline use**.
 
-It is the demo behind an [AppsCounty](https://appscounty.com/blog) article on keeping mobile apps under the App Store's 200 MB mobile-data download limit.
+Built by [Kalemba Jamil](https://appscounty.com/authors/kalemba-jamil) at [AppsCounty](https://appscounty.com) as the demo for an article on staying under the App Store's 200 MB mobile-data download limit.
 
-| Core ready | Downloading | Saved offline | Paused, resumes |
+| Core ready on first launch | Downloading extra content | Saved for offline use | Paused, resumes on retry |
 |---|---|---|---|
-| ![](screenshots/simulator/1-core-ready.png) | ![](screenshots/simulator/2-downloading.png) | ![](screenshots/simulator/3-saved-offline.png) | ![](screenshots/simulator/4-paused-retry.png) |
+| ![App home screen with the bundled lesson ready](screenshots/simulator/1-core-ready.png) | ![Placeholders and a progress bar while guides download](screenshots/simulator/2-downloading.png) | ![Downloaded crop guides shown as photos, saved offline](screenshots/simulator/3-saved-offline.png) | ![Download paused with 5 of 11 guides saved and a retry button](screenshots/simulator/4-paused-retry.png) |
 
-## What it shows
+*Screenshots: iPhone 15 Pro simulator, iOS 17.4, Capacitor 8.*
 
-- **Core first.** Today's lesson and its photo are bundled with the app, so the first screen works with no download.
-- **Extra content on demand.** The 11 crop guides (about 0.6 MB) download only when the user asks, while the app is open. No background downloads, so no extra permissions or notifications.
-- **Placeholders and progress**, so the screen is never blank and the user can keep using the app.
-- **Resume after failure.** Files already saved are skipped on retry, so a dropped connection does not restart the whole pack.
+## Contents
 
-All of it is plain HTML, CSS and JavaScript in [`www/`](www/); the logic is in [`www/main.js`](www/main.js).
+- [Why download content after install?](#why-download-content-after-install)
+- [How it works](#how-it-works)
+- [Capacitor iOS: "TypeError: Request url is not HTTP/HTTPS"](#capacitor-ios-typeerror-request-url-is-not-httphttps)
+- [IndexedDB or the Filesystem plugin?](#indexeddb-or-the-filesystem-plugin)
+- [Run the demo](#run-the-demo)
+- [FAQ](#faq)
+- [Credits and licence](#credits-and-licence)
 
-## A Capacitor gotcha: Cache Storage fails on iOS
+## Why download content after install?
 
-The first version saved files with the browser's Cache Storage API (`caches.open()` and `cache.put()`). It worked in the browser and failed inside the iOS app with:
+Large apps lose installs. On iPhone, apps over **200 MB** ask for confirmation before downloading on mobile data, and many people simply wait for Wi-Fi or give up. On Google Play the main download is limited to 200 MB, and anything bigger has to be split into feature modules or asset packs.
+
+A common fix is to ship only what the first screen needs and download the rest later: lesson media, maps, product images, offline content. This demo shows that pattern in plain JavaScript inside a Capacitor app, so it also works for apps built with Lovable, Bolt, Base44 or any React/Vite web app wrapped with Capacitor.
+
+## How it works
+
+All the code is in [`www/main.js`](www/main.js) (about 160 lines, no framework).
+
+1. **Core first.** Today's lesson and its photo are bundled inside the app, so the first screen works offline with no download.
+2. **Download on demand, while the app is open.** The 11 crop guides (about 0.6 MB) download only when the user taps Download. There are no background downloads, so the app needs no extra permissions, background services or notifications.
+3. **Never a blank screen.** Shimmering placeholders and a progress bar ("Downloading 5 of 11") tell the user they can keep using the app.
+4. **Resume, don't restart.** Each file is saved as soon as it arrives. On retry, files already saved are skipped, so a dropped connection costs only the missing files.
+5. **Offline afterwards.** Saved files are read from the device, so the guides open without a connection.
+
+## Capacitor iOS: "TypeError: Request url is not HTTP/HTTPS"
+
+The first version saved files with the browser's **Cache Storage API** (`caches.open()` and `cache.put()`). It worked in Chrome and Safari, then failed inside the iOS app:
 
 ```
 TypeError: Request url is not HTTP/HTTPS
 ```
 
-On iOS, Capacitor serves the app from `capacitor://localhost`, and Cache Storage only accepts `http` and `https` requests. The demo stores files in **IndexedDB** instead, which works in both.
+**Why:** on iOS, Capacitor serves your app from `capacitor://localhost`. Cache Storage only accepts requests with `http` or `https` URLs, so `cache.put()` rejects every file loaded from the app's own `capacitor://` origin. On Android, Capacitor's default scheme is `https`, so the same code can work there and fail only on iPhone.
 
-For large packs in a real app, prefer the [`@capacitor/filesystem`](https://capacitorjs.com/docs/apis/filesystem) plugin: Capacitor's [storage guide](https://capacitorjs.com/docs/guides/storage) notes that iOS can clear web storage, including IndexedDB, when the device runs low on space.
+You can't configure your way out of it: Capacitor's `iosScheme` option can't be set to `http` or `https`, because WKWebView already handles those schemes.
 
-## Run it
+**Fix used here:** store the downloaded files in **IndexedDB** as blobs, which works in the browser, on Android and on iOS.
 
-Requirements: Node.js 18+, Xcode (for iOS).
+## IndexedDB or the Filesystem plugin?
+
+IndexedDB keeps this demo short and dependency-free. For a production app with large packs, prefer the [`@capacitor/filesystem`](https://capacitorjs.com/docs/apis/filesystem) plugin and save files in the app's data directory. Capacitor's [storage guide](https://capacitorjs.com/docs/guides/storage) warns that iOS can clear web storage, including IndexedDB, when the device runs low on space.
+
+| | IndexedDB | `@capacitor/filesystem` |
+|---|---|---|
+| Works in browser too | Yes | No (native only) |
+| Extra dependency | None | One plugin |
+| Can iOS clear it when storage is low? | Yes | No, files live in the app's own folder |
+| Good for | Demos, small caches | Large media and offline packs |
+
+## Run the demo
+
+Requirements: Node.js 18+ and Xcode for iOS.
 
 ```bash
+git clone https://github.com/KalembaUG/capacitor-offline-download-demo.git
+cd capacitor-offline-download-demo
 npm install
 npx cap sync ios
 npx cap open ios
 ```
 
-Then run it on a simulator or device from Xcode. To try the web version only, serve the `www` folder with any static server, for example `python3 -m http.server --directory www`.
+Run it from Xcode on a simulator or device. To try the web version only:
+
+```bash
+python3 -m http.server 4173 --directory www
+```
 
 ### Hidden demo controls
 
@@ -49,7 +87,21 @@ There are no visible debug buttons, so screenshots show only the app:
 - Tap **"Farm Lessons"** to toggle a slow connection.
 - Tap **"Good morning"** to toggle a connection that drops halfway through the download.
 
+## FAQ
+
+**Does downloading after install get around the 200 MB limit?**
+The limit applies to the app download from the store. Content your app fetches later is not part of that size, but keep it reasonable, and make the app useful before the extra content arrives.
+
+**Why not download in the background when the app is closed?**
+Background transfers bring extra rules: on Android a foreground service with a visible notification (or WorkManager), and on iOS background URL sessions. Downloading while the app is open keeps the app simple and is enough for many apps.
+
+**Does this work on Android?**
+Yes. The code is plain web code and runs the same in Capacitor's Android WebView. Add the platform with `npm install @capacitor/android && npx cap add android`.
+
+**Can I use this in a Lovable or Bolt app?**
+Yes. Wrap the app with Capacitor, then adapt `download()` in `www/main.js` to fetch your content from your server or CDN instead of the bundled `pack/` folder.
+
 ## Credits and licence
 
-- Code: [MIT](LICENSE), by Kalemba Jamil, [AppsCounty](https://appscounty.com).
-- Photos: from [Unsplash](https://unsplash.com), under the [Unsplash License](https://unsplash.com/license). They are **not** covered by the MIT licence. Sources for each photo are in [`photo-credits.tsv`](photo-credits.tsv).
+- Code: [MIT](LICENSE), by [Kalemba Jamil](https://appscounty.com/authors/kalemba-jamil), [AppsCounty](https://appscounty.com). We fix vibe-coded apps and ship web apps to the App Store and Google Play.
+- Photos: from Unsplash under the [Unsplash License](https://unsplash.com/license), not covered by the MIT licence. Sources are listed in [PHOTOS.md](PHOTOS.md).
