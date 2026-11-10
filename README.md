@@ -2,7 +2,7 @@
 
 A working Capacitor (Ionic) example of keeping a mobile app small: the app ships only its core screen, downloads extra images **after install while the app is open**, shows progress, resumes after a failed download, and keeps everything on the phone for **offline use**.
 
-Built by [Kalemba Jamil](https://appscounty.com/authors/kalemba-jamil) at [AppsCounty](https://appscounty.com) as the demo for an article on staying under the App Store's 200 MB mobile-data download limit.
+Built by [Kalemba Jamil](https://appscounty.com/authors/kalemba-jamil) at [AppsCounty](https://appscounty.com) as the demo for the article [App Over 200 MB? Ship the Core First and Download the Rest Later](https://appscounty.com/blog/app-over-200mb-download-after-install), which explains the approach, the 2026 store rules and the iOS gotcha below.
 
 | Core ready on first launch | Downloading extra content | Saved for offline use | Paused, resumes on retry |
 |---|---|---|---|
